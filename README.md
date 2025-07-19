@@ -1,33 +1,35 @@
 # Meteor Two Factor
 
+Updated for Meteor 3.0+
+
 Simple two factor authentication for accounts-password.
 
 ## Table of Contents
 
-- [Installation](https://github.com/dburles/meteor-two-factor#installation)
-- [Prerequisites](https://github.com/dburles/meteor-two-factor#prerequisites)
-- [Example Application](https://github.com/dburles/meteor-two-factor#example-application)
-- [Usage](https://github.com/dburles/meteor-two-factor#example-application)
-  - [Client](https://github.com/dburles/meteor-two-factor#usage-client)
-  - [Server](https://github.com/dburles/meteor-two-factor#usage-server)
-- [API](https://github.com/dburles/meteor-two-factor#api)
-  - [Client](https://github.com/dburles/meteor-two-factor#api-client)
-    - [getAuthCode](https://github.com/dburles/meteor-two-factor#getauthcode)
-    - [getNewAuthCode](https://github.com/dburles/meteor-two-factor#getnewauthcode)
-    - [verifyAndLogin](https://github.com/dburles/meteor-two-factor#verifyandlogin)
-    - [isVerifying](https://github.com/dburles/meteor-two-factor#isverifying)
-    - [abort](https://github.com/dburles/meteor-two-factor#abort)
-  - [Server](https://github.com/dburles/meteor-two-factor#api-server)
-    - [sendCode](https://github.com/dburles/meteor-two-factor#sendcode)
-    - [options](https://github.com/dburles/meteor-two-factor#options)
-    - [validateLoginAttempt](https://github.com/dburles/meteor-two-factor#validateloginattempt-optional)
-    - [generateCode](https://github.com/dburles/meteor-two-factor#generatecode-optional)
-- [License](https://github.com/dburles/meteor-two-factor#license)
+- [Installation](https://github.com/Back2Dev/meteor-two-factor#installation)
+- [Prerequisites](https://github.com/Back2Dev/meteor-two-factor#prerequisites)
+- [Example Application](https://github.com/Back2Dev/meteor-two-factor#example-application)
+- [Usage](https://github.com/Back2Dev/meteor-two-factor#example-application)
+  - [Client](https://github.com/Back2Dev/meteor-two-factor#usage-client)
+  - [Server](https://github.com/Back2Dev/meteor-two-factor#usage-server)
+- [API](https://github.com/Back2Dev/meteor-two-factor#api)
+  - [Client](https://github.com/Back2Dev/meteor-two-factor#api-client)
+    - [getAuthCode](https://github.com/Back2Dev/meteor-two-factor#getauthcode)
+    - [getNewAuthCode](https://github.com/Back2Dev/meteor-two-factor#getnewauthcode)
+    - [verifyAndLogin](https://github.com/Back2Dev/meteor-two-factor#verifyandlogin)
+    - [isVerifying](https://github.com/Back2Dev/meteor-two-factor#isverifying)
+    - [abort](https://github.com/Back2Dev/meteor-two-factor#abort)
+  - [Server](https://github.com/Back2Dev/meteor-two-factor#api-server)
+    - [sendCode](https://github.com/Back2Dev/meteor-two-factor#sendcode)
+    - [options](https://github.com/Back2Dev/meteor-two-factor#options)
+    - [validateLoginAttempt](https://github.com/Back2Dev/meteor-two-factor#validateloginattempt-optional)
+    - [generateCode](https://github.com/Back2Dev/meteor-two-factor#generatecode-optional)
+- [License](https://github.com/Back2Dev/meteor-two-factor#license)
 
 ## Installation
 
 ```sh
-$ meteor add dburles:two-factor
+$ meteor add mikkelking:two-factor
 ```
 
 ## Prerequisites
@@ -47,44 +49,44 @@ Client and server usage examples.
 Typically you would call this method via your application login form event handler:
 
 ```js
-twoFactor.getAuthCode(user, password, error => {
+twoFactor.getAuthCode(user, password, (error) => {
   if (error) {
     // Handle the error
   }
   // Success!
-});
+})
 ```
 
 After calling `getAuthCode` if you wish, you can request a new authentication code:
 
 ```js
-twoFactor.getNewAuthCode(error => {
+twoFactor.getNewAuthCode((error) => {
   if (error) {
     // Handle the error
   }
   // Success!
-});
+})
 ```
 
 The following method is reactive and represents the state of authentication. Use it to display the interface to enter the authentication code:
 
 ```js
-Tracker.autorun(function() {
+Tracker.autorun(function () {
   if (twoFactor.isVerifying()) {
-    console.log('Ready to enter authentication code!');
+    console.log("Ready to enter authentication code!")
   }
-});
+})
 ```
 
 Capture the authentication code and pass it to the following method to validate the code and log the user in:
 
 ```js
-twoFactor.verifyAndLogin(code, error => {
+twoFactor.verifyAndLogin(code, (error) => {
   if (error) {
     // Handle the error
   }
   // Success!
-});
+})
 ```
 
 ## Usage (Server)
@@ -97,13 +99,13 @@ twoFactor.sendCode = (user, code) => {
   Meteor.defer(() => {
     // Send code via email
     Email.send({
-      to: user.email(), // Method attached using dburles:collection-helpers
-      from: 'noreply@example.com',
-      subject: 'Your authentication code',
-      text: `${code} is your authentication code.`
-    });
-  });
-};
+      to: user.email(), // Method attached using mikkelking:collection-helpers
+      from: "noreply@example.com",
+      subject: "Your authentication code",
+      text: `${code} is your authentication code.`,
+    })
+  })
+}
 ```
 
 **Optional functions:**
@@ -111,17 +113,17 @@ twoFactor.sendCode = (user, code) => {
 ```js
 // Optional
 // Conditionally allow regular or two-factor sign in
-twoFactor.validateLoginAttempt = options => {
+twoFactor.validateLoginAttempt = (options) => {
   // If two factor auth isn't enabled for this user, allow regular sign in.
-  return !options.user.twoFactorEnabled;
-};
+  return !options.user.twoFactorEnabled
+}
 ```
 
 ```js
 // Optional
 twoFactor.generateCode = () => {
   // return a random string
-};
+}
 ```
 
 **Security note:**
@@ -129,30 +131,30 @@ twoFactor.generateCode = () => {
 Use [DDPRateLimiter](https://docs.meteor.com/api/methods.html#ddpratelimiter) to prevent verification code cracking
 
 ```js
-import { DDPRateLimiter } from 'meteor/ddp-rate-limiter';
+import { DDPRateLimiter } from "meteor/ddp-rate-limiter"
 
-const numberOfAttempts = 5;
-const timeInterval = 60;
+const numberOfAttempts = 5
+const timeInterval = 60
 
 DDPRateLimiter.addRule(
   {
-    type: 'method',
+    type: "method",
     userId: null,
     clientAddress: null,
     name(name) {
       const methods = [
-        'twoFactor.verifyCodeAndLogin',
-        'twoFactor.getAuthenticationCode'
-      ];
-      return methods.includes(name);
+        "twoFactor.verifyCodeAndLogin",
+        "twoFactor.getAuthenticationCode",
+      ]
+      return methods.includes(name)
     },
     connectionId() {
-      return true;
-    }
+      return true
+    },
   },
   numberOfAttempts,
   timeInterval * 1000
-);
+)
 ```
 
 ## API
